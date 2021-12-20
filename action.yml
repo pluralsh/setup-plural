@@ -1,0 +1,10 @@
+name: Setup Plural
+description: Sets up the plural cli in your github repo
+inputs:
+  config:
+    description: Plural Config File
+    required: true
+outputs: {}
+runs:
+  using: 'node12'
+  main: 'index.js'
