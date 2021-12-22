@@ -21,12 +21,13 @@ async function run() {
 }
 
 async function download() {
-  core.info(`donwload URL: ${PLRL_URL}`)
+  core.info(`download URL: ${PLRL_URL}`)
   const p = await tc.downloadTool(PLRL_URL);
   core.info(`downloaded plural to ${p}`)
   cachedPath = await tc.cacheFile(p, 'plural', 'plural', VSN);
   await exec.exec(`chmod +x ${cachedPath}/plural`)
   core.addPath(cachedPath)
+  await exec.exec('helm plugin install https://github.com/pluralsh/helm-push')
 }
 
 async function setupConfig() {
