@@ -4,6 +4,10 @@ inputs:
   config:
     description: Plural Config File
     required: true
+  vsn:
+    description: the plural cli version to use
+    required: false
+    default: '0.3.6'
 outputs: {}
 runs:
   using: 'node12'

@@ -6,12 +6,12 @@ const io = require('@actions/io');
 const fs = require('fs');
 const path = require('path');
 
+const PLRL_URL_FMT = "https://github.com/pluralsh/plural-cli/releases/download/vVSN/plural-cli_VSN_Linux_x86_64.tar.gz"
 
-const PLRL_URL = "https://app.plural.sh/artifacts/plural/plural?platform=linux&arch=amd64"
-const VSN = '1.0' //
 async function run() {
   try {
-    await download();
+    const vsn = core.getInput('vsn', { required: false });
+    await download(vsn);
     core.info("installed plural")
     await setupConfig();
     await exec.exec("plural --help");
@@ -20,14 +20,15 @@ async function run() {
   }
 }
 
-async function download() {
-  core.info(`download URL: ${PLRL_URL}`)
-  const p = await tc.downloadTool(PLRL_URL);
-  core.info(`downloaded plural to ${p}`)
-  cachedPath = await tc.cacheFile(p, 'plural', 'plural', VSN);
+async function download(vsn) {
+  const url = PLRL_URL_FMT.replace(/VSN/g, vsn)
+  core.info(`download URL: ${url}`)
+  const p = await tc.downloadTool(url);
+  const folder = await tc.extractTar(p, 'plural');
+  core.info(`downloaded plural to ${folder}`)
+  cachedPath = await tc.cacheDir(folder, 'plural', vsn);
   await exec.exec(`chmod +x ${cachedPath}/plural`)
   core.addPath(cachedPath)
-  await exec.exec('helm plugin install https://github.com/pluralsh/helm-push')
 }
 
 async function setupConfig() {
