@@ -14,5 +14,5 @@ inputs:
     default: 'amd64'
 outputs: {}
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
