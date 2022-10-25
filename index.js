@@ -26,7 +26,7 @@ async function download(vsn, plat) {
                           .replace(/PLAT/g, plat)
   core.info(`download URL: ${url}`)
   const p = await tc.downloadTool(url);
-  const folder = await tc.extractTar(p, 'plural');
+  const folder = await tc.extractTar(p);
   core.info(`downloaded plural to ${folder}`)
   cachedPath = await tc.cacheDir(folder, 'plural', vsn);
   await exec.exec(`chmod +x ${cachedPath}/plural`)
