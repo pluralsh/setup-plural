@@ -6,12 +6,13 @@ const io = require('@actions/io');
 const fs = require('fs');
 const path = require('path');
 
-const PLRL_URL_FMT = "https://github.com/pluralsh/plural-cli/releases/download/vVSN/plural-cli_VSN_Linux_x86_64.tar.gz"
+const PLRL_URL_FMT = "https://github.com/pluralsh/plural-cli/releases/download/vVSN/plural-cli_VSN_Linux_PLAT.tar.gz"
 
 async function run() {
   try {
     const vsn = core.getInput('vsn', { required: false });
-    await download(vsn);
+    const plat = core.getInput('plat', { required: false }) || 'amd64'
+    await download(vsn, plat);
     core.info("installed plural")
     await setupConfig();
     await exec.exec("plural --help");
@@ -20,8 +21,9 @@ async function run() {
   }
 }
 
-async function download(vsn) {
+async function download(vsn, plat) {
   const url = PLRL_URL_FMT.replace(/VSN/g, vsn)
+                          .replace(/PLAT/g, plat)
   core.info(`download URL: ${url}`)
   const p = await tc.downloadTool(url);
   const folder = await tc.extractTar(p, 'plural');
