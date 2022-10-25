@@ -7,7 +7,11 @@ inputs:
   vsn:
     description: the plural cli version to use
     required: false
-    default: '0.3.6'
+    default: '0.5.18'
+  plat:
+    description: the cli platform to specify
+    required: false
+    default: 'amd64'
 outputs: {}
 runs:
   using: 'node12'
