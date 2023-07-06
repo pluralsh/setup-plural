@@ -5,8 +5,10 @@ const io = require('@actions/io');
 
 const fs = require('fs');
 const path = require('path');
+const cmp = require('semver-compare');
 
-const PLRL_URL_FMT = "https://github.com/pluralsh/plural-cli/releases/download/vVSN/plural-cli_VSN_Linux_PLAT.tar.gz"
+const PLRL_URL_FMT_LEGACY = "https://github.com/pluralsh/plural-cli/releases/download/vVSN/plural-cli_VSN_Linux_PLAT.tar.gz"
+const PLRL_URL_FMT = "https://github.com/pluralsh/plural-cli/releases/download/vVSN/plural-cli_console_VSN_Linux_PLAT.tar.gz"
 
 async function run() {
   try {
@@ -21,8 +23,13 @@ async function run() {
   }
 }
 
+function urlFormat(vsn) {
+  if (cmp(vsn, '0.6.23') >= 0) return PLRL_URL_FMT
+  return PLRL_URL_FMT_LEGACY
+}
+
 async function download(vsn, plat) {
-  const url = PLRL_URL_FMT.replace(/VSN/g, vsn)
+  const url = urlFormat(vsn).replace(/VSN/g, vsn)
                           .replace(/PLAT/g, plat)
   core.info(`download URL: ${url}`)
   const p = await tc.downloadTool(url);
