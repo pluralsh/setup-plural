@@ -48,6 +48,7 @@ async function setupConfig(vsn) {
   if (!conf) {
     if (cmp(vsn, '0.7.0') >= 0) {
       await setupTempConfig()
+      setOutput()
     } else {
       core.setFailed("you must use versions greater than 0.7.0 with temporary credentials")
     }
@@ -60,6 +61,7 @@ async function setupConfig(vsn) {
   await fs.writeFile(path.join(homedir, ".plural", "config.yml"), conf, 'utf8', (err) => {
     if (err) throw err
     core.info('wrote config file')
+    setOutput()
   })
 }
 
@@ -75,10 +77,10 @@ async function setupTempConfig() {
   await exec.exec(`plural auth oidc github_actions --token ${token} --email ${email}`)
 }
 
-async function setOutput() {
+function setOutput() {
   const fname = path.join(process.env.HOME, '.plural', 'config.yml')
   const config = yaml.load(fs.readFileSync(fname, 'utf8'));
-  core.setOutput('token', config.spec.token)
+  core.setOutput('token', config?.spec?.token || config?.token)
 }
 
 run();
