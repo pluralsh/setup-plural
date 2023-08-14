@@ -19,7 +19,6 @@ async function run() {
     await download(vsn, plat);
     core.info("installed plural")
     await setupConfig(vsn);
-    await setOutput()
     await exec.exec("plural --help");
   } catch (error) {
     core.setFailed(error.message);
