@@ -3,15 +3,18 @@ description: Sets up the plural cli in your github repo
 inputs:
   config:
     description: Plural Config File
-    required: true
+    required: false
   vsn:
     description: the plural cli version to use
     required: false
-    default: '0.5.18'
+    default: '0.7.0'
   plat:
     description: the cli platform to specify
     required: false
     default: 'amd64'
+  email:
+    description: the email to log in with via oidc
+    required: false
 outputs: {}
 runs:
   using: 'node16'
