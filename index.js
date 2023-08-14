@@ -3,7 +3,7 @@ const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 const io = require('@actions/io');
 const jwt_decode = require("jwt-decode");
-
+const yaml = require('js-yaml')
 
 const fs = require('fs');
 const path = require('path');
@@ -19,6 +19,7 @@ async function run() {
     await download(vsn, plat);
     core.info("installed plural")
     await setupConfig(vsn);
+    await setOutput()
     await exec.exec("plural --help");
   } catch (error) {
     core.setFailed(error.message);
@@ -72,6 +73,12 @@ async function setupTempConfig() {
   const claims = jwt_decode(token)
   core.info(`logging in with jwt subject: ${claims.sub}`)
   await exec.exec(`plural auth oidc github_actions --token ${token} --email ${email}`)
+}
+
+async function setOutput() {
+  const fname = path.join(process.env.HOME, '.plural', 'config.yml')
+  const config = yaml.load(fs.readFileSync(fname, 'utf8'));
+  core.setOutput('token', config.spec.token)
 }
 
 run();
