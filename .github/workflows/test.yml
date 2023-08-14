@@ -23,6 +23,8 @@ jobs:
   test2:
     name: Test later versions
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -34,5 +36,6 @@ jobs:
         uses: ./
         with:
           config: ${{ secrets.PLURAL_CONF }}
-          vsn: '0.6.24'
+          vsn: '0.7.0'
       - run: plural --help
+      - run: plural repos list

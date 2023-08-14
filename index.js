@@ -2,6 +2,8 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 const io = require('@actions/io');
+const jwt_decode = require("jwt-decode");
+
 
 const fs = require('fs');
 const path = require('path');
@@ -16,7 +18,7 @@ async function run() {
     const plat = core.getInput('plat', { required: false }) || 'amd64'
     await download(vsn, plat);
     core.info("installed plural")
-    await setupConfig();
+    await setupConfig(vsn);
     await exec.exec("plural --help");
   } catch (error) {
     core.setFailed(error.message);
@@ -40,14 +42,36 @@ async function download(vsn, plat) {
   core.addPath(cachedPath)
 }
 
-async function setupConfig() {
+async function setupConfig(vsn) {
   let conf = core.getInput('config');
+  if (!conf) {
+    if (cmp(vsn, '0.7.0') >= 0) {
+      await setupTempConfig()
+    } else {
+      core.setFailed("you must use versions greater than 0.7.0 with temporary credentials")
+    }
+  
+    return
+  }
+
   const homedir = process.env.HOME
   await io.mkdirP(path.join(homedir, ".plural"))
   await fs.writeFile(path.join(homedir, ".plural", "config.yml"), conf, 'utf8', (err) => {
     if (err) throw err
     core.info('wrote config file')
   })
+}
+
+async function setupTempConfig() {
+  const token = await core.getIDToken()
+  const email = core.getInput('email')
+  if (!email) {
+    core.setFailed("`email` is required when authenticating with oidc")
+    return
+  }
+  const claims = jwt_decode(token)
+  core.info(`logging in with jwt subject: ${claims.sub}`)
+  await exec.exec(`plural auth oidc github_actions --token ${token} --email ${email}`)
 }
 
 run();
