@@ -79,6 +79,11 @@ async function setupTempConfig() {
 function setOutput() {
   const fname = path.join(process.env.HOME, '.plural', 'config.yml')
   const config = yaml.load(fs.readFileSync(fname, 'utf8'));
+  const token = config?.spec?.token || config?.token
+  if (token) {
+    core.setSecret(token)
+  }
+  
   core.setOutput('token', config?.spec?.token || config?.token)
 }
 
