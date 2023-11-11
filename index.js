@@ -45,6 +45,13 @@ async function download(vsn, plat) {
 async function setupConfig(vsn) {
   let conf = core.getInput('config');
   if (!conf) {
+    if (!core.getInput("email")) {
+      if (!process.env.PLURAL_CONSOLE_TOKEN) {
+        core.setFailed("if you want to use `plural cd` commands you need to set $PLURAL_CONSOLE_TOKEN and $PLURAL_CONSOLE_URL")
+      }
+      return
+    }
+
     if (cmp(vsn, '0.7.0') >= 0) {
       await setupTempConfig()
       setOutput()
