@@ -26,6 +26,7 @@ async function run() {
 }
 
 function urlFormat(vsn) {
+  if (cmp(vsn, '0.8.5') >= 0) return PLRL_URL_FMT_LEGACY
   if (cmp(vsn, '0.6.23') >= 0) return PLRL_URL_FMT
   return PLRL_URL_FMT_LEGACY
 }
