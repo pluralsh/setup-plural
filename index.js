@@ -48,7 +48,7 @@ async function setupConfig(vsn) {
   if (!conf) {
     if (!core.getInput("email")) {
       if (!process.env.PLURAL_CONSOLE_TOKEN) {
-        core.setFailed("if you want to use `plural cd` commands you need to set $PLURAL_CONSOLE_TOKEN and $PLURAL_CONSOLE_URL")
+        core.info("if you want to use `plural cd` commands you need to set $PLURAL_CONSOLE_TOKEN and $PLURAL_CONSOLE_URL")
       }
       return
     }
@@ -76,7 +76,7 @@ async function setupTempConfig() {
   const token = await core.getIDToken()
   const email = core.getInput('email')
   if (!email) {
-    core.setFailed("`email` is required when authenticating with oidc")
+    core.info("`email` is required when authenticating with oidc")
     return
   }
   const claims = jwt_decode(token)
