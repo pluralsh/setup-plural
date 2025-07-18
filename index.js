@@ -19,6 +19,7 @@ async function run() {
     await download(vsn, plat);
     core.info("installed plural")
     await setupConfig(vsn);
+    await setupConsoleLogin();
     await exec.exec("plural --help");
   } catch (error) {
     core.setFailed(error.message);
@@ -82,6 +83,19 @@ async function setupTempConfig() {
   const claims = jwt_decode(token)
   core.info(`logging in with jwt subject: ${claims.sub}`)
   await exec.exec(`plural auth oidc github_actions --token ${token} --email ${email}`)
+}
+
+async function setupConsoleLogin() {
+  const consoleToken = core.getInput('console_token');
+  const consoleUrl = core.getInput('console_url');
+  
+  if (consoleToken && consoleUrl) {
+    core.exportVariable('PLURAL_CONSOLE_TOKEN', consoleToken);
+    core.exportVariable('PLURAL_CONSOLE_URL', consoleUrl);
+    core.info('Console authentication configured with provided token and URL');
+  } else if (consoleToken || consoleUrl) {
+    core.setFailed('Both console_token and console_url must be provided together');
+  }
 }
 
 function setOutput() {
