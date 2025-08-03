@@ -1,26 +1,26 @@
 name: Setup Plural
 description: Sets up the plural cli in your github repo
 inputs:
+  email:
+    description: The user email to log in with via OIDC federated credential
+    required: false
+  consoleToken:
+    description: 'Plural console authentication token'
+    required: false
+  consoleUrl:
+    description: 'Plural console URL endpoint'
+    required: false
   config:
-    description: Plural Config File
+    description: Plural CLI Config File (you should prefer using OIDC federated credentials for authentication)
     required: false
   vsn:
     description: the plural cli version to use
     required: false
-    default: '0.8.0'
+    default: '0.12.14'
   plat:
     description: the cli platform to specify
     required: false
     default: 'amd64'
-  email:
-    description: the email to log in with via oidc
-    required: false
-  console_token:
-    description: 'Plural console authentication token'
-    required: false
-  console_url:
-    description: 'Plural console URL endpoint'
-    required: false
 outputs: {}
 runs:
   using: 'node16'

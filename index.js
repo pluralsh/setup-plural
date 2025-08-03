@@ -47,16 +47,12 @@ async function download(vsn, plat) {
 async function setupConfig(vsn) {
   let conf = core.getInput('config');
   if (!conf) {
-    if (!core.getInput("email")) {
-      if (!process.env.PLURAL_CONSOLE_TOKEN) {
-        core.info("if you want to use `plural cd` commands you need to set $PLURAL_CONSOLE_TOKEN and $PLURAL_CONSOLE_URL")
-      }
+    if (!core.getInput("email") && core.getInput("consoleUrl")) {
       return
     }
 
     if (cmp(vsn, '0.7.0') >= 0) {
       await setupTempConfig()
-      setOutput()
     } else {
       core.setFailed("you must use versions greater than 0.7.0 with temporary credentials")
     }
@@ -76,6 +72,11 @@ async function setupConfig(vsn) {
 async function setupTempConfig() {
   const token = await core.getIDToken()
   const email = core.getInput('email')
+  const consoleUrl = core.getInput('consoleUrl')
+  if (consoleUrl) {
+    return
+  }
+
   if (!email) {
     core.info("`email` is required when authenticating with oidc")
     return
@@ -83,18 +84,49 @@ async function setupTempConfig() {
   const claims = jwt_decode(token)
   core.info(`logging in with jwt subject: ${claims.sub}`)
   await exec.exec(`plural auth oidc github_actions --token ${token} --email ${email}`)
+  setOutput()
+}
+
+async function getConsoleOIDCToken(url, email) {
+  const token = await core.getIDToken()
+  const claims = jwt_decode(token)
+  core.info(`logging in with jwt subject: ${claims.sub}`)
+  
+  const response = await fetch(path.join(url, 'v1/token/exchange'), {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ email, jwt: token }),
+  })
+  if (!response.ok) {
+    const body = await response.text()
+    core.setFailed(`failed to exchange token: ${response.status} ${body}`)
+    return null
+  }
+  const data = await response.json()
+  return data.access_token
 }
 
 async function setupConsoleLogin() {
-  const consoleToken = core.getInput('console_token');
-  const consoleUrl = core.getInput('console_url');
+  let consoleToken = core.getInput('consoleToken');
+  const consoleUrl = core.getInput('consoleUrl');
+  const email = core.getInput('email');
+
+  if (consoleUrl && email && !consoleToken) {
+    consoleToken = await getConsoleOIDCToken(consoleUrl, email)
+    if (!consoleToken) {
+      return
+    }
+  }
   
   if (consoleToken && consoleUrl) {
     core.exportVariable('PLURAL_CONSOLE_TOKEN', consoleToken);
     core.exportVariable('PLURAL_CONSOLE_URL', consoleUrl);
-    core.info('Console authentication configured with provided token and URL');
-  } else if (consoleToken || consoleUrl) {
-    core.setFailed('Both console_token and console_url must be provided together');
+    core.setSecret(consoleToken)
+    core.setOutput('consoleToken', consoleToken)
+    core.setOutput('consoleUrl', consoleUrl)
+    core.info('Console authentication configured!');
+  } else if (consoleUrl) {
+    core.setFailed('Both consoleToken and consoleUrl must be provided together');
   }
 }
 
@@ -104,9 +136,8 @@ function setOutput() {
   const token = config?.spec?.token || config?.token
   if (token) {
     core.setSecret(token)
+    core.setOutput('token', config?.spec?.token || config?.token)
   }
-  
-  core.setOutput('token', config?.spec?.token || config?.token)
 }
 
 run();
