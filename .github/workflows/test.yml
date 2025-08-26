@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: "16"
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Test downloading plural
         uses: ./
         with:
@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: "16"
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Test downloading plural
         uses: ./
         with:
